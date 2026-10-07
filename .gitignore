@@ -23,3 +23,17 @@ STARTUP_GUIDE.txt
 # Parsing script (local utility, not part of project)
 backend/parse_court_opinions_parquet.py
 backend/parse_court_opinions_JSON.py
+
+# Stage 0 ingest outputs (regenerate with python -m app.ingest.cli)
+backend/data/*.parquet
+backend/data/inventory.json
+backend/data/inventory.csv
+backend/data/litigation_families.json
+backend/data/decision_relations.json
+backend/data/pilot_*_decisions.json
+
+# Supabase CLI local cache
+supabase/.temp/
+
+# Local LEXIS dump (corpus already loaded in Supabase)
+current_docs/MS Word files*/

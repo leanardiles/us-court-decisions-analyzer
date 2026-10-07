@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Handover to Alex — Data pipeline and RAG retrieve</title>
+  <style>
+    @page { size: letter; margin: 0.7in 0.75in 0.85in 0.75in; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #333; font-family: "Inter", "Helvetica Neue", Arial, sans-serif; font-size: 10.5pt; line-height: 1.45; }
+    h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; color: #003C71; }
+    h1 { font-size: 20pt; margin: 0 0 6px 0; }
+    h2 { font-size: 13pt; margin: 16px 0 8px 0; padding-bottom: 4px; border-bottom: 2px solid #0071BC; }
+    h3 { font-size: 11pt; margin: 12px 0 6px 0; color: #0071BC; }
+    p { margin: 0 0 8px 0; }
+    .kicker { color: #FFB81C; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; font-size: 8.5pt; margin-bottom: 6px; }
+    .banner { background: #003C71; color: #fff; padding: 16px 18px; margin: 0 0 0 0; }
+    .banner h1, .banner p { color: #fff; }
+    .goldbar { height: 6px; background: #FFB81C; margin: 0 0 16px 0; }
+    .meta { font-size: 9.5pt; color: #d7e6f4; }
+    .callout { background: #F5F5F5; border-left: 4px solid #0071BC; padding: 10px 12px; margin: 10px 0 14px 0; }
+    .warn { border-left-color: #FFB81C; }
+    table { width: 100%; border-collapse: collapse; margin: 8px 0 14px 0; font-size: 9.3pt; }
+    th { background: #003C71; color: #fff; text-align: left; padding: 6px 8px; }
+    td { padding: 6px 8px; vertical-align: top; border-bottom: 1px solid #E5E5E5; }
+    tr:nth-child(even) td { background: #F5F5F5; }
+    ol, ul { margin: 4px 0 10px 18px; padding: 0; }
+    li { margin-bottom: 4px; }
+    code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 8.7pt; background: #F5F5F5; padding: 1px 4px; }
+    .keep { page-break-inside: avoid; }
+    .footer-note { font-size: 8.5pt; color: #666; margin-top: 12px; }
+    h2.appendix { page-break-before: always; margin-top: 0; }
+    .appendix-block { font-size: 9pt; line-height: 1.32; }
+    .appendix-block h3 { margin: 7px 0 3px 0; font-size: 10.5pt; }
+    .appendix-block p { margin: 0 0 5px 0; }
+    .appendix-block ul { margin: 2px 0 6px 16px; }
+    .appendix-block li { margin-bottom: 1px; }
+    .appendix-block table { font-size: 8.4pt; margin: 4px 0 6px 0; page-break-inside: avoid; }
+    .appendix-block th, .appendix-block td { padding: 4px 7px; }
+    .appendix-block .callout { margin: 6px 0 8px 0; padding: 7px 10px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; page-break-inside: avoid; }
+    .sql { display: block; white-space: pre-wrap; margin: 2px 0 5px 0; padding: 4px 6px; background: #F5F5F5; font-size: 7.2pt; line-height: 1.3; }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <div class="kicker">COM 6001 · Capstone II · Internal handover</div>
+    <h1>From Enock (data / RAG retrieve) to Alex (agents)</h1>
+    <p>What is already in Supabase, what the code does, and the first steps to plug in the multi-agent layer.</p>
+    <div class="meta">Prepared by Enock Katenda · For Alex Ji · cc Leandro Ardiles, Tafadzwa Nyemba · 5 October 2026</div>
+  </div>
+  <div class="goldbar"></div>
+
+  <h2>1. One-sentence status</h2>
+  <p>
+    The court-opinion corpus is ingested into one shared Supabase Postgres database, identified by <strong>LEXIS citation</strong> (not file name), grouped into <strong>litigation families</strong>, chunked, and searchable with <strong>pgvector</strong>.
+    Enock’s track is the RAG retrieve store. Alex’s track starts here: generate answers with Groq agents using this data. Do not rebuild ingest. Do not use the Capstone I SQLite app as the corpus.
+  </p>
+
+  <h2>2. What Enock finished</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>Word → structured decisions (rules, not Groq)</td><td>Done</td><td><code>backend/app/ingest/</code></td></tr>
+      <tr><td>Identity = LEXIS cite; <code>(2)</code> files are other decisions in the same lawsuit</td><td>Done</td><td><code>decisions.lexis_citation</code></td></tr>
+      <tr><td>Litigation families + prior/subsequent links</td><td>Done</td><td><code>litigation_families</code>, <code>decision_relations</code></td></tr>
+      <tr><td>Load full corpus (not only the pilot)</td><td>Done</td><td>540 decisions, 427 families, 383 relations</td></tr>
+      <tr><td>Chunk + local embeddings + pgvector index</td><td>Done</td><td>14,987 chunks, 0 offset mismatches</td></tr>
+      <tr><td>Retrieve CLI (search, not a legal answer)</td><td>Done</td><td><code>python -m app.ingest.load_supabase --query "..."</code></td></tr>
+      <tr><td>50-decision frozen pilot for Q1/Q2</td><td>Done, pending Tafadzwa labels</td><td><code>backend/data/pilot_50_manifest.json</code></td></tr>
+      <tr><td>HTTP retrieve API for agents</td><td>Not built. Python <code>retrieve()</code> now returns a list of dicts; CLI still prints.</td><td><code>retrieve()</code> in <code>load_supabase.py</code></td></tr>
+      <tr><td>Multi-agent readers / adjudicator / Groq</td><td>Alex</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>No Groq is used in ingest.</strong> Parsing is rule-based. Chunking is character windows. Embeddings are a local model (<code>BAAI/bge-small-en-v1.5</code>, 384-d) on the laptop. The only cloud write is Supabase. Save the Groq budget for agent runs.
+  </div>
+
+  <h2>3. How to think about the data (Leandro’s rules)</h2>
+  <ul>
+    <li><strong>Unit of identity:</strong> LEXIS citation, e.g. <code>2020 U.S. Dist. LEXIS 187996</code>.</li>
+    <li><code>Craig v. Simon.docx</code> and <code>Craig v. Simon(2).docx</code> are <strong>different decisions</strong> (8th Cir. vs D. Minn.), same <strong>family</strong>.</li>
+    <li>Do not collapse filenames. Do not key experiments on <code>short_name</code> alone.</li>
+    <li>About 86 files have no <code>U.S. … LEXIS</code> line (often state courts) — <code>lexis_citation</code> is null; they still have <code>source_filename</code>.</li>
+    <li>One true re-export pair shares <code>2021 U.S. LEXIS 1197</code> (two captions, one cite). Only one row was loaded.</li>
+  </ul>
+
+  <h2>4. Supabase tables</h2>
+  <p>Project: <code>https://mvpecqzqzuuxpwuazyaq.supabase.co</code> · Dashboard → Table Editor.</p>
+  <table>
+    <thead><tr><th>Table</th><th>Rows</th><th>Alex uses it for</th></tr></thead>
+    <tbody>
+      <tr><td><code>decisions</code></td><td>540</td><td>Full <code>opinion_text</code> / dissent / concur, cite, court, date, <code>family_id</code></td></tr>
+      <tr><td><code>litigation_families</code></td><td>427</td><td>Related district + appeal decisions</td></tr>
+      <tr><td><code>decision_relations</code></td><td>383</td><td>Prior / affirmed / related cites from LEXIS headers</td></tr>
+      <tr><td><code>opinion_chunks</code></td><td>14,987</td><td>Retrieval: <code>text</code>, <code>char_start</code>, <code>char_end</code>, <code>embedding</code>, <code>section</code></td></tr>
+    </tbody>
+  </table>
+  <p>Offsets are into that section’s stored text: <code>opinion_text[char_start:char_end] == chunk.text</code>.</p>
+
+  <h2>5. Baby steps for Alex</h2>
+  <ol>
+    <li><strong>Do not start a new repo.</strong> Wait for Enock’s ingest branch on <code>github.com/leanardiles/us-court-decisions-analyzer</code> (this code is not on GitHub until Enock pushes).</li>
+    <li><strong>Get Supabase access</strong> via dashboard invite (not a password in Slack). Confirm you can open <code>decisions</code> and <code>opinion_chunks</code>.</li>
+    <li><strong>Local setup</strong> from <code>backend/</code>:
+      <br /><code>python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt</code>
+      <br />Copy <code>.env.example</code> → <code>.env</code>. Enock will give URL + DB password privately. This Mac has no <code>python</code> binary; use <code>./venv/bin/python</code> or activate the venv.</li>
+    <li><strong>Smoke-test retrieve</strong> (search, not an LLM answer):
+      <br /><code>./venv/bin/python -m app.ingest.load_supabase --query "Purcell principle days before an election" --k 5</code>
+      <br />Restrict to one decision: add <code>--lexis "2024 U.S. Dist. LEXIS 185656"</code></li>
+    <li><strong>Read a full opinion for an agent.</strong> SQL: <code>select lexis_citation, source_filename, opinion_text from decisions where lexis_citation = '...'</code>. The 50 were <em>chosen</em> as 2k–50k characters; full text is stored. About 9 of 50 have no LEXIS cite — use <code>source_filename</code>. The other 490 can be huge — use retrieve for those, not the whole blob.</li>
+    <li><strong>Plug retrieve into System B, do not replace ingest.</strong> From Python:
+      <br /><code>from app.ingest.load_supabase import retrieve</code>
+      <br /><code>hits = retrieve(question, k=8, lexis_citation=cite, print_results=False)</code>
+      <br />Each hit has <code>text</code>, <code>char_start</code>, <code>char_end</code>, <code>section</code>, <code>score</code>, <code>lexis_citation</code>, <code>source_filename</code>. Or wrap that in a FastAPI route later. Prompt = question + retrieved chunks + (optional) full opinion for short cases.</li>
+    <li><strong>Start on the frozen 50, not all 540.</strong> Manifest: <code>backend/data/pilot_50_manifest.json</code>. Q1 = election type (control). Q2 = days between trial ruling and election (known failure). Tafadzwa owns ground truth keyed by LEXIS citation.</li>
+    <li><strong>Run System A vs System B on that same 50.</strong> System A = one Groq call. System B = two independent readers + adjudicator; preserve disagreement. Models from the 23 Sep shortlist (GPT-OSS 20B / 120B, Qwen 3.8 27B). Log case id, model, role, prompt version, answer, evidence spans, confidence, tokens, latency, cost.</li>
+    <li><strong>Do not write agent answers into <code>opinion_text</code>.</strong> Add new tables later (e.g. <code>agent_runs</code>) or keep JSONL experiment logs first.</li>
+    <li><strong>Human stays last.</strong> Agents flag; validators/scholar decide. That is unchanged from Capstone I.</li>
+  </ol>
+
+  <h2>6. Enock’s way forward (do this next)</h2>
+  <div class="callout warn">
+    <strong>Yes — you should push the code to GitHub.</strong> Alex cannot continue from this laptop. The live data is already in Supabase; GitHub is for the ingest/retrieve <em>code</em>. Do it as a PR or a branch. Ask Leandro if you cannot push to <code>main</code> (the remote is his: <code>leanardiles/us-court-decisions-analyzer</code>).
+  </div>
+  <p><strong>Push</strong></p>
+  <ul>
+    <li><code>backend/app/ingest/</code>, <code>supabase/</code>, <code>.env.example</code>, <code>backend/app/core/config.py</code>, <code>.gitignore</code>, <code>pilot_50_manifest.json</code></li>
+    <li>This handover PDF</li>
+  </ul>
+  <p><strong>Do not push</strong></p>
+  <ul>
+    <li><code>backend/.env</code> (password + keys) — already gitignored</li>
+    <li>The 541 Word files (optional; they are already in Supabase). If the folder is huge, leave it local or gitignore it.</li>
+    <li><code>backend/data/pilot_50_decisions.json</code> (full opinion text dump)</li>
+  </ul>
+  <p><strong>Then</strong></p>
+  <ol>
+    <li>Open a PR (or ask Leandro to merge) so Alex can clone the ingest code.</li>
+    <li>Invite Alex (and Tafadzwa) to the Supabase project as team members.</li>
+    <li>Send Alex the DB password in a private channel, not in this PDF and not in the group chat.</li>
+    <li>Give Tafadzwa <code>pilot_50_manifest.json</code> and ask for Q1/Q2 labels keyed by LEXIS citation.</li>
+    <li>Stay owner of ingest/retrieve. If Alex needs an HTTP <code>/retrieve</code> route, that is a small follow-up on your side — not a blocker for him to start in Python.</li>
+  </ol>
+
+  <h2>7. Commands cheat sheet</h2>
+  <table>
+    <thead><tr><th>Task</th><th>Command (from <code>backend/</code>)</th></tr></thead>
+    <tbody>
+      <tr><td>Search chunks</td><td><code>./venv/bin/python -m app.ingest.load_supabase --query "..." --k 5</code></td></tr>
+      <tr><td>Search one case</td><td>same + <code>--lexis "2020 U.S. Dist. LEXIS 187996"</code></td></tr>
+      <tr><td>Re-parse Word → DB</td><td><code>./venv/bin/python -m app.ingest.load_supabase --all</code></td></tr>
+      <tr><td>Rebuild embeddings</td><td><code>./venv/bin/python -m app.ingest.load_supabase --embed</code> (slow; hours on CPU)</td></tr>
+      <tr><td>Schema</td><td><code>backend/app/ingest/supabase_schema.sql</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2>8. What not to do</h2>
+  <ul>
+    <li>Do not stand up a second database or a chatbot UI.</li>
+    <li>Do not send 540 full opinions through Groq.</li>
+    <li>Do not treat filename as the primary key.</li>
+    <li>Do not commit <code>.env</code>.</li>
+    <li>Do not silently replace the 50-case manifest.</li>
+    <li>Do not connect to <code>db.*.supabase.co</code> (IPv4 will fail). Use the session pooler in the appendix.</li>
+    <li>Do not query these tables with the publishable REST key.</li>
+  </ul>
+  <h2 class="appendix">9. Appendix — connect, SQL, retrieve contract</h2>
+  <div class="appendix-block">
+  <p>Read this before the first agent run. Passwords stay out of this file; Enock sends them privately.</p>
+
+  <div class="grid2">
+    <div>
+      <h3>9.1 Connect (session pooler, not the “direct” host)</h3>
+      <p><code>db.mvpecqzqzuuxpwuazyaq.supabase.co:5432</code> does not resolve on a typical IPv4 laptop. Use:</p>
+      <ul>
+        <li>Host <code>aws-0-us-east-2.pooler.supabase.com</code> · port <code>6543</code> · db <code>postgres</code></li>
+        <li>User <code>postgres.mvpecqzqzuuxpwuazyaq</code> · SSL required</li>
+        <li><code>SUPABASE_URL=https://mvpecqzqzuuxpwuazyaq.supabase.co</code></li>
+        <li><code>SUPABASE_DB_PASSWORD='…'</code> — <strong>single-quote</strong> it (<code>#</code> and <code>$</code>)</li>
+        <li><code>SUPABASE_DB_URL</code> = same user @ pooler host, URL-encoded password, <code>?sslmode=require</code></li>
+      </ul>
+    </div>
+    <div>
+      <h3>9.2 Embedding contract (must match)</h3>
+      <ul>
+        <li>Model <code>BAAI/bge-small-en-v1.5</code> · 384-d · local <code>fastembed</code></li>
+        <li>Distance cosine · Postgres <code>&lt;=&gt;</code></li>
+        <li>Chunks ~3200 chars / 400 overlap · section = opinion | dissent | concur</li>
+        <li>Query prefix is already applied in <code>embed_query()</code></li>
+        <li>First run downloads the model from Hugging Face (no token)</li>
+      </ul>
+      <div class="callout warn">
+        The publishable <code>sb_publishable_…</code> key cannot REST-query these tables (“Secret API key required”). Use Postgres (password / pooler), not <code>supabase-js</code> + anon, until RLS is added.
+      </div>
+    </div>
+  </div>
+
+  <h3>9.3 SQL Alex will actually run</h3>
+  <code class="sql">-- one decision; if lexis_citation is null, key by source_filename
+select lexis_citation, source_filename, court, decision_date, opinion_text, dissent_text
+from decisions where lexis_citation = '2020 U.S. Dist. LEXIS 187996';
+select * from decisions where source_filename = 'Abdus-Sabur v. Evans.docx';
+-- siblings in the same lawsuit
+select d.short_name, d.lexis_citation, d.court_level, d.decision_date, d.source_filename
+from decisions d join litigation_families f on f.id = d.family_id
+where f.family_key = 'craig v simon' order by d.decision_date;</code>
+  <p><strong>Pilot 50:</strong> <code>backend/data/pilot_50_manifest.json</code>. About 9 of 50 have no U.S. LEXIS cite — key those by <code>source_filename</code>. Chosen as 2k–50k chars, max 3 per family. Full opinion text is stored (the length cap was only for picking the 50).</p>
+
+  <h3>9.4 Python retrieve (returns dicts; CLI still prints)</h3>
+  <code class="sql">from app.ingest.load_supabase import retrieve
+hits = retrieve("days between ruling and election", k=8,
+    lexis_citation="2020 U.S. Dist. LEXIS 187996", print_results=False)
+# keys: decision_id, short_name, lexis_citation, source_filename,
+#        section, chunk_index, char_start, char_end, score, text</code>
+
+  <h3>9.5 Experiment log (JSONL now, <code>agent_runs</code> table later)</h3>
+  <p>One object per agent call: <code>lexis_citation</code> or <code>source_filename</code>, <code>system</code> (A|B), <code>agent_role</code> (reader_a|reader_b|adjudicator), <code>model</code>, <code>prompt_version</code>, <code>question_id</code> (Q1|Q2), <code>answer</code>, <code>cited_char_start</code>, <code>cited_char_end</code>, <code>confidence</code>, <code>agree</code>, <code>tokens_in</code>, <code>tokens_out</code>, <code>latency_ms</code>, <code>cost_usd</code>, <code>run_at</code>. Do not write these into <code>decisions.opinion_text</code>.</p>
+
+  <h3>9.6 Who owns what</h3>
+  <p><strong>Enock</strong> ingest / retrieve / schema · <strong>Alex</strong> Groq readers + adjudicator on the frozen 50 · <strong>Leandro</strong> GitHub + official Groq account (Capstone I app is not the corpus) · <strong>Tafadzwa</strong> Q1/Q2 labels keyed by LEXIS (or filename if NO CITE).</p>
+
+  <p class="footer-note">
+    Repo (after push): github.com/leanardiles/us-court-decisions-analyzer ·
+    Code: backend/app/ingest/ ·
+    Store: Supabase project mvpecqzqzuuxpwuazyaq ·
+    Experiment design remains the 23 September status report (System A vs System B on a frozen set).
+  </p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Capstone II Data Pipeline Roadmap</title>
+  <style>
+    @page {
+      size: letter;
+      margin: 0.7in 0.75in 0.85in 0.75in;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: #333333;
+      font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.45;
+    }
+    h1, h2, h3, .serif {
+      font-family: Georgia, "Times New Roman", serif;
+      color: #003C71;
+    }
+    h1 {
+      font-size: 22pt;
+      line-height: 1.2;
+      margin: 0 0 6px 0;
+    }
+    h2 {
+      font-size: 13.5pt;
+      margin: 16px 0 8px 0;
+      padding-bottom: 4px;
+      border-bottom: 2px solid #0071BC;
+    }
+    h3 {
+      font-size: 11pt;
+      margin: 14px 0 6px 0;
+      color: #0071BC;
+    }
+    p { margin: 0 0 8px 0; }
+    .kicker {
+      color: #0071BC;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 8.5pt;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      font-size: 12pt;
+      color: #003C71;
+      margin: 0 0 10px 0;
+    }
+    .meta {
+      font-size: 9.5pt;
+      color: #666666;
+      margin-bottom: 14px;
+    }
+    .banner {
+      background: #003C71;
+      color: #fff;
+      padding: 16px 18px;
+      margin: 0 0 16px 0;
+    }
+    .banner h1, .banner .subtitle { color: #fff; }
+    .banner .kicker { color: #FFB81C; }
+    .banner .meta { color: #d7e6f4; }
+    .goldbar {
+      height: 6px;
+      background: #FFB81C;
+      margin: 0 0 18px 0;
+    }
+    .callout {
+      background: #F5F5F5;
+      border-left: 4px solid #0071BC;
+      padding: 10px 12px;
+      margin: 10px 0 14px 0;
+    }
+    .warn {
+      border-left-color: #FFB81C;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0 14px 0;
+      font-size: 9.4pt;
+    }
+    th {
+      background: #003C71;
+      color: #fff;
+      text-align: left;
+      padding: 6px 8px;
+      font-weight: 600;
+    }
+    td {
+      padding: 6px 8px;
+      vertical-align: top;
+      border-bottom: 1px solid #E5E5E5;
+    }
+    tr:nth-child(even) td { background: #F5F5F5; }
+    ul, ol { margin: 4px 0 10px 18px; padding: 0; }
+    li { margin-bottom: 3px; }
+    .status {
+      display: inline-block;
+      font-size: 8pt;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 1px 7px;
+      border-radius: 10px;
+    }
+    .done { background: #d1fae5; color: #065f46; }
+    .now { background: #fef3c7; color: #92400e; }
+    .next { background: #dbeafe; color: #1e40af; }
+    .later { background: #E5E5E5; color: #444; }
+    .stage-title { font-weight: 700; color: #003C71; }
+    .footer-note {
+      font-size: 8.5pt;
+      color: #666666;
+      margin-top: 16px;
+    }
+    .keep { page-break-inside: auto; }
+    .callout, .flow { page-break-inside: avoid; }
+    table.compact { page-break-inside: avoid; }
+    code {
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: 8.8pt;
+      background: #F5F5F5;
+      padding: 1px 4px;
+    }
+    .flow {
+      display: flex;
+      gap: 6px;
+      margin: 10px 0 14px 0;
+      font-size: 8.6pt;
+      font-weight: 600;
+    }
+    .flow div {
+      flex: 1;
+      background: #003C71;
+      color: #fff;
+      text-align: center;
+      padding: 8px 4px;
+      border-radius: 3px;
+    }
+    .flow div:nth-child(1) { background: #10B981; }
+    .flow div:nth-child(2) { background: #0071BC; }
+    .flow div:nth-child(3) { background: #003C71; }
+    .flow div:nth-child(4) { background: #003C71; }
+    .small { font-size: 8.5pt; color: #666; font-weight: 400; display: block; margin-top: 3px; }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <div class="kicker">COM 6001 · Capstone in Computer Science II</div>
+    <h1>Data Pipeline Roadmap</h1>
+    <p class="subtitle">How we get from 541 Word opinions to a frozen 20-case pilot, then Postgres + pgvector — without rebuilding the app.</p>
+    <div class="meta">
+      Court Opinions Analyzer, Phase II · Improving Reliability in Legal AI Through Multi-Agent Verification<br />
+      Prepared by Enock Katenda (Infrastructure) · For Alex Ji, Leandro Ardiles, Tafadzwa Nyemba<br />
+      30 September 2026
+    </div>
+  </div>
+  <div class="goldbar"></div>
+
+  <h2>1. Why this document exists</h2>
+  <p>
+    Capstone II is an experiment: keep the Capstone I application as <strong>System A</strong>, add a multi-agent layer as <strong>System B</strong>, and measure whether agent disagreement catches bad legal answers better than self-reported confidence.
+  </p>
+  <p>
+    The real corpus is not currently in the app. It lives as <strong>541 LEXIS Word files</strong>. The app today only uploads Parquet into SQLite. The later Evidence Checker will need <strong>cited spans</strong>, which means chunked text with offsets — and eventually pgvector.
+  </p>
+  <div class="callout">
+    <strong>Decision:</strong> we do not start a new repository or a new product. The pipeline is added inside
+    <code>us-court-decisions-analyzer</code>. It feeds the existing upload / module-launch / validator workflow.
+    Postgres and pgvector come after a usable 20-case set exists, not before.
+  </div>
+
+  <h2>2. Research constraint (do not skip this)</h2>
+  <p>Every pipeline choice has to serve the team plan already agreed in the 23 September status report:</p>
+  <table class="compact">
+    <thead>
+      <tr>
+        <th style="width:12%">Phase</th>
+        <th style="width:38%">Capstone II focus</th>
+        <th>Timing</th>
+        <th>Pipeline must deliver</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1–2</td>
+        <td>Reproduce baseline; benchmark GPT-OSS 20B / 120B / Qwen 3.8 27B</td>
+        <td>Weeks 1–2<br />24 Sep – 7 Oct</td>
+        <td>Frozen 20-case Parquet the current app can upload</td>
+      </tr>
+      <tr>
+        <td>3–4</td>
+        <td>Build two readers + adjudicator; compare System A vs B</td>
+        <td>Weeks 3–5</td>
+        <td>Postgres + clean case rows; retrieval stub if needed</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>Temporal agent + evidence checker</td>
+        <td>Week 6+</td>
+        <td>Chunks, character offsets, pgvector search</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    Q1 (type of election) is the control — Capstone I was strong here. Q2 (days between trial ruling and election) is the known failure mode. Ground truth is Tafadzwa’s; models and agents are Alex’s; the live app and API account are Leandro’s; data plumbing is Enock’s.
+  </p>
+
+  <h2>3. How the stages run</h2>
+  <div class="flow">
+    <div>Stage 0<br /><span class="small">Word → 20-case Parquet</span></div>
+    <div>Stage 1<br /><span class="small">Clean metadata + splits</span></div>
+    <div>Stage 2<br /><span class="small">SQLite → Postgres</span></div>
+    <div>Stage 3–4<br /><span class="small">Chunks + pgvector + retrieve</span></div>
+  </div>
+
+  <div class="keep">
+    <h3>Stage 0 — Frozen pilot (this week) <span class="status done">Done</span></h3>
+    <p><strong>Goal.</strong> Unblock the 7 October benchmark without waiting for Postgres.</p>
+    <p><strong>How it runs.</strong> A CLI walks <code>current_docs/MS Word files (544 files total)/</code>, extracts text, hashes files, groups duplicates, and writes a Parquet file whose columns already match the existing upload parser.</p>
+    <p><strong>Command (from <code>backend/</code>):</strong> <code>python -m app.ingest.cli --pilot 20</code></p>
+    <table class="compact">
+      <thead><tr><th>Input</th><th>Output</th><th>Who uses it</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>541 LEXIS .docx files</td>
+          <td><code>backend/data/pilot_20.parquet</code></td>
+          <td>Leandro — upload in the existing admin UI</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><code>backend/data/pilot_20_manifest.json</code></td>
+          <td>Whole team — frozen case list; do not silently replace</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><code>backend/data/inventory.csv</code></td>
+          <td>Tafadzwa — start Q1/Q2 answer key</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Result of the first run (30 Sep 2026).</strong> 541 files parsed, 0 failures, 540 unique opinions, 77 same-name alias groups (e.g. <em>Veasey v. Perry (2)</em>). Twenty unique cases selected with a length cap so they fit in an LLM context window (about 2k–48k characters of opinion text). All 20 have a parsed date; 17 have a docket number.</p>
+    <div class="callout warn">
+      <strong>Still required from the team:</strong> Tafadzwa reviews the 20 names for Q1/Q2 suitability and writes the answer key. After that review, the manifest is frozen. If a case is a bad fit, we swap it in a new manifest version — we do not silently regenerate the list.
+    </div>
+  </div>
+
+  <div class="keep">
+    <h3>Stage 1 — Word → structured cases <span class="status now">Next</span></h3>
+    <p><strong>Goal.</strong> Reliable metadata and opinion / dissent / concurrence splits for the whole corpus, still as a CLI. No new UI. No embeddings.</p>
+    <p><strong>How it runs.</strong></p>
+    <ol>
+      <li>Extract paragraphs with <code>python-docx</code> / XML (already working).</li>
+      <li>Strip remaining LEXIS artifacts (reporter stars, counsel blocks, “End of Document”).</li>
+      <li>Parse caption fields with rules first: case name, court, date, citation, docket, judges. Use an LLM only if rules fail — do not spend Groq budget on 541 files.</li>
+      <li>Split body into opinion / dissent / concurrence.</li>
+      <li>Dedup by text hash; keep filename aliases as sources, not extra cases.</li>
+      <li>Write one canonical row per unique opinion. Leave <code>election_type</code> empty. Humans and agents answer Q1; ingest must not invent it.</li>
+    </ol>
+    <p><strong>Success.</strong> Unique opinions load (~450 after alias collapse). A parse-failure report exists. Docket / court / date quality is good enough for the experiment log.</p>
+    <p><strong>When.</strong> 1–8 October, in parallel with the model benchmark.</p>
+  </div>
+
+  <div class="keep">
+    <h3>Stage 2 — Move storage to Postgres <span class="status next">Weeks 3–4</span></h3>
+    <p><strong>Goal.</strong> Same 13-table workflow, now on Postgres, so pgvector can be added later. SQLite remains a Dummy-AI fallback.</p>
+    <p><strong>How it runs.</strong></p>
+    <ol>
+      <li>Docker Compose: Postgres 16 + <code>CREATE EXTENSION vector;</code></li>
+      <li>Point <code>DATABASE_URL</code> at Postgres. Add Alembic (already planned in the schema changelog).</li>
+      <li>Port existing tables unchanged. Do not redesign <code>court_cases</code> or <code>launch_module()</code>.</li>
+      <li>Add only ingest columns: <code>source_documents</code> (path, sha256, parse status) and on <code>court_cases</code>: source id, citation, raw text, character length.</li>
+    </ol>
+    <p><strong>Success.</strong> Login, project, module, validator, and feedback flows still work. Official experiments can load the frozen 20 from Postgres instead of a one-off Parquet upload.</p>
+  </div>
+
+  <div class="keep">
+    <h3>Stage 3 — Chunking + pgvector <span class="status later">After Stage 1 is clean</span></h3>
+    <p><strong>Goal.</strong> Store opinion pieces with stable character offsets so an agent can cite a span and an Evidence Checker can verify it.</p>
+    <p><strong>How it runs.</strong></p>
+    <ol>
+      <li>Split on legal sections first (Opinion, Dissent, I., II.), then paragraphs, then 400–800 token windows with overlap.</li>
+      <li>Save <code>char_start</code> / <code>char_end</code> against the cleaned source text. Round-trip test: <code>raw_text[start:end] == chunk.text</code>.</li>
+      <li>Embed with a local/open model (e.g. nomic-embed-text). Do not spend the Groq experiment budget on embeddings.</li>
+      <li>Write <code>opinion_chunks</code> (vector column) and <code>ingest_runs</code> (files seen, cases written, errors).</li>
+    </ol>
+    <p><strong>What this is not.</strong> Not a chatbot. Not a replacement for sending the full opinion on the 20-case pilot. Readers still get the whole opinion for Q1/Q2. Retrieval is for long documents, span citation, and Phase 5 evidence checking.</p>
+    <p><strong>When.</strong> Once Stage 1 metadata is trusted; target late October so it is ready before the Evidence Checker.</p>
+  </div>
+
+  <div class="keep">
+    <h3>Stage 4 — Plug in without rewriting the app <span class="status later">With System B</span></h3>
+    <p><strong>Engineering rule from the 24 September slides:</strong> do not rewrite the frontend first. Replace only the single analysis call behind <code>launch_module()</code>.</p>
+    <table class="compact">
+      <thead><tr><th>Today</th><th>After the pipeline</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Admin uploads one Parquet file</td>
+          <td>Admin can still upload Parquet (System A). Optional: “Load Codrington corpus” from ingest.</td>
+        </tr>
+        <tr>
+          <td><code>CourtCase.opinion_text</code> is the whole document</td>
+          <td>Same column stays. Chunks sit beside it.</td>
+        </tr>
+        <tr>
+          <td><code>_run_groq_ai_analysis()</code> sees full text</td>
+          <td>Unchanged for the 20-case benchmark. Later, an internal <code>POST /internal/retrieve</code> returns top-k spans.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>4. Calendar — who does what while the pipeline runs</h2>
+  <table class="compact">
+    <thead>
+      <tr>
+        <th>When</th>
+        <th>Enock (infrastructure)</th>
+        <th>Rest of team</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>30 Sep – 7 Oct<br />Week 2 checkpoint</td>
+        <td>Stage 0 complete. Start Stage 1. Share this 20-case list.</td>
+        <td>Everyone runs Dummy AI baseline. Leandro: model IDs + API key. Tafadzwa: ground truth on the 20. Alex: agent interface spec.</td>
+      </tr>
+      <tr>
+        <td>8 – 21 Oct<br />Weeks 3–4</td>
+        <td>Finish Stage 1. Stage 2 Postgres. Retrieval stub can return full-text chunks without embeddings.</td>
+        <td>Alex builds two readers + adjudicator behind <code>launch_module()</code>. Dummy mode first.</td>
+      </tr>
+      <tr>
+        <td>22 – 28 Oct<br />Evaluate</td>
+        <td>Stage 3 embeddings on the frozen 20, then the rest of the corpus.</td>
+        <td>System A vs System B on the identical 20 cases. Same metrics: accuracy, disagreement, calibration, tokens, cost.</td>
+      </tr>
+      <tr>
+        <td>Week 6+</td>
+        <td>Retrieval quality, offset integrity, ingest-run metrics.</td>
+        <td>Temporal reasoning agent and Evidence Checker consume cited spans.</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <strong>If Stage 3 slips, the experiment still runs.</strong> System A vs B only needs <code>opinion_text</code> on 20 cases. Vectors are an accelerator for evidence, not a gate on the research question.
+  </div>
+
+  <h2>5. Frozen pilot (proposed — pending Tafadzwa review)</h2>
+  <p>Selected for election-related language, unique case identity, court diversity, and LLM-safe length. Not yet human-validated for Q1/Q2.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Case</th>
+        <th>Court</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>Republican Nat’l Comm. v. Wetzel</td><td>5th Cir.</td></tr>
+      <tr><td>2</td><td>Bognet v. Boockvar</td><td>W.D. Pa.</td></tr>
+      <tr><td>3</td><td>Minn. Voters Alliance v. Lake Cnty.</td><td>Minn. Dist. Ct.</td></tr>
+      <tr><td>4</td><td>Am. Council of the Blind of Ind. v. Ind. Election Comm’n</td><td>S.D. Ind.</td></tr>
+      <tr><td>5</td><td>League of Women Voters of S.C. v. Andino</td><td>D.S.C.</td></tr>
+      <tr><td>6</td><td>Shabazz v. N.Y.C. Bd. of Elections</td><td>N.Y. Sup. Ct.</td></tr>
+      <tr><td>7</td><td>Alliance for Retired Ams. v. Sec’y of State</td><td>Me. Sup. Jud. Ct.</td></tr>
+      <tr><td>8</td><td>Adair County Bd. of Elections v. Arnold</td><td>Ky. Ct. App.</td></tr>
+      <tr><td>9</td><td>State ex rel. Skaggs v. Brunner</td><td>S.D. Ohio</td></tr>
+      <tr><td>10</td><td>Tex. League of United Latin Am. Citizens v. Hughs</td><td>5th Cir.</td></tr>
+      <tr><td>11</td><td>League of Women Voters v. LaRose</td><td>S.D. Ohio</td></tr>
+      <tr><td>12</td><td>Republican Nat’l Comm. v. Schmidt</td><td>Pa. Sup. Ct.</td></tr>
+      <tr><td>13</td><td>Carson v. Simon</td><td>8th Cir.</td></tr>
+      <tr><td>14</td><td>New Ga. Project v. Raffensperger</td><td>11th Cir.</td></tr>
+      <tr><td>15</td><td>Self Advocacy Sol. N.D. v. Jaeger</td><td>D.N.D.</td></tr>
+      <tr><td>16</td><td>Moore v. Circosta</td><td>E.D.N.C.</td></tr>
+      <tr><td>17</td><td>Common Cause/Georgia v. Billups</td><td>11th Cir.</td></tr>
+      <tr><td>18</td><td>Paher v. Cegavske</td><td>D. Nev.</td></tr>
+      <tr><td>19</td><td>Carey v. Wis. Elections Comm’n</td><td>W.D. Wis.</td></tr>
+      <tr><td>20</td><td>Short v. Brown</td><td>E.D. Cal.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>6. What we will not do</h2>
+  <ul>
+    <li>Do not create a second GitHub project or a chatbot UI.</li>
+    <li>Do not embed before metadata parse and dedup are trusted. Garbage vectors are expensive to redo.</li>
+    <li>Do not send 541 full opinions through Groq to “extract everything.” Rules for captions; Groq budget is for the 20-case benchmark.</li>
+    <li>Do not invent a new case schema that breaks <code>launch_module()</code>. Add columns; do not fork <code>CourtCase</code>.</li>
+    <li>Do not treat filename as identity. Use content hash + parsed caption. Copies like <code>(2).docx</code> are aliases.</li>
+  </ul>
+
+  <h2>7. Ask of the team at the next meeting</h2>
+  <ol>
+    <li><strong>Tafadzwa:</strong> review the 20-case list; confirm or swap; begin Q1/Q2 ground truth.</li>
+    <li><strong>Leandro:</strong> upload <code>pilot_20.parquet</code> into a Capstone II project so everyone is on the same corpus.</li>
+    <li><strong>Alex:</strong> keep agent interfaces independent of storage. Reader output still needs <em>cited evidence spans</em>; Stage 3 will make those spans real.</li>
+    <li><strong>Enock:</strong> proceed to Stage 1 once the 20 are accepted.</li>
+  </ol>
+  <p class="footer-note">
+    Source documents: <em>Status Report and Plan — Capstone II</em> (23 Sep 2026) and <em>Capstone II — 24 September</em> slides.
+    Code: <code>backend/app/ingest/</code> in the existing Court Opinions Analyzer repository.
+    This note describes the infrastructure track only; it does not change the System A vs System B evaluation design.
+  </p>
+</body>
+</html>

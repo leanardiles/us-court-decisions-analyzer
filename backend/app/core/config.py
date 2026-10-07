@@ -5,39 +5,42 @@ This file manages environment variables and application settings.
 """
 
 from pydantic_settings import BaseSettings
-from typing import Optional
+from pathlib import Path
+
+ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
+
 
 class Settings(BaseSettings):
     """
     Application settings loaded from environment variables.
-    
-    Create a .env file in backend/ folder with:
-        SECRET_KEY=your-secret-key-min-32-characters-long
-        ALGORITHM=HS256
-        ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+    Create a .env file in backend/ folder.
     """
-    
-    # JWT Settings
+
     SECRET_KEY: str = "your-secret-key-change-this-in-production-min-32-chars"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    
-    # Groq:
-    GROQ_API_KEY: str = ""  # Groq API key for AI analysis
-    
-    class Config:
-        env_file = ".env"
 
-    # Database
+    GROQ_API_KEY: str = ""
+
+    # Capstone I local app
     DATABASE_URL: str = "sqlite:///./database.db"
-    
-    # Application
+
+    # Shared Capstone II store (Supabase)
+    SUPABASE_URL: str = ""
+    SUPABASE_ANON_KEY: str = ""
+    SUPABASE_KEY: str = ""  # alias for the publishable/anon key
+    SUPABASE_SERVICE_ROLE_KEY: str = ""
+    SUPABASE_DB_URL: str = ""
+    SUPABASE_DB_PASSWORD: str = ""
+
     APP_NAME: str = "Court Opinions Analyzer"
     DEBUG: bool = True
-    
+
     class Config:
-        env_file = ".env"
+        env_file = str(ENV_FILE)
+        extra = "ignore"
         case_sensitive = True
 
-# Create global settings instance
+
 settings = Settings()

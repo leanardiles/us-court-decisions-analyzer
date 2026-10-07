@@ -1,14 +1,62 @@
 # Court Opinions Analyzer
 
-AI-powered web application for analyzing court opinions with in-context learning and human-in-the-loop verification.
+AI-assisted analysis of election-law opinions, with human-in-the-loop verification.
 
-**Capstone Project** | Katz School of Applied Sciences & Cardozo Law School (Yeshiva University)  
-**Team Members:** Leandro Ardiles
-**Status:** 🚧 In Development
+**Capstone I + II** | Katz School of Applied Sciences & Cardozo Law School (Yeshiva University)  
+**Team:** Leandro Ardiles, Alex Ji, Enock Katenda, Tafadzwa Nyemba  
+**Status:** Capstone II in progress — corpus ingested; System A vs System B evaluation not yet run
+
+There are two stores. Do not mix them up:
+
+| Store | What it is | Who uses it |
+|---|---|---|
+| **Capstone I app** (SQLite + FastAPI/React) | System A baseline: one Groq call, validator, scholar review | Leandro / local demo |
+| **Capstone II corpus** (shared Supabase Postgres + pgvector) | 539 unique LEXIS decisions, families, chunks, retrieve | Whole team; Alex’s agents |
+
+Identity is the **LEXIS citation**, not the file name. `Craig v. Simon.docx` and `Craig v. Simon(2).docx` are different decisions in the same lawsuit.
 
 ---
 
-## 📋 Project Overview
+## Capstone II — corpus and retrieve
+
+The LEXIS Word dump is parsed with rules (no Groq). Embeddings are a local model. Groq is reserved for agent runs.
+
+**What is loaded now**
+
+- 541 Word files parsed; 539 decisions stored (one true re-export skipped; one stub with no LEXIS cite not stored)
+- 427 litigation families; citation links in `decision_relations`
+- ~14,977 chunks with character offsets and 384-d embeddings (`BAAI/bge-small-en-v1.5`)
+- Frozen 50-decision pilot: `backend/data/pilot_50_manifest.json`
+- Row-level security is **on** (no public REST policies). Use the Postgres connection, not the publishable/anon key, to read tables.
+
+**Ingest / retrieve** (from `backend/`, venv activated; on this Mac use `./venv/bin/python` if `python` is missing)
+
+```bash
+./venv/bin/python -m app.ingest.load_supabase --ping
+./venv/bin/python -m app.ingest.load_supabase --query "Purcell principle days before an election" --k 5
+./venv/bin/python -m app.ingest.load_supabase --query "..." --lexis "2020 U.S. Dist. LEXIS 187996"
+```
+
+From Python (agents):
+
+```python
+from app.ingest.load_supabase import retrieve
+hits = retrieve(question, k=8, lexis_citation=cite, print_results=False)
+```
+
+Parser regression tests (need the local Word folder or `WORD_CORPUS_DIR`):
+
+```bash
+cd backend && PYTHONPATH=. ./venv/bin/python -m unittest tests.test_extract_qa -v
+```
+
+Do **not** commit `backend/.env`, the Word dump, or full-text JSON dumps. Copy `backend/.env.example` and get the DB password privately. Quote `SUPABASE_DB_PASSWORD` if it contains `#` or `$`. Connect through the session pooler (`aws-0-us-east-2.pooler.supabase.com:6543`), not `db.*.supabase.co`.
+
+Details: [`backend/app/ingest/README.md`](backend/app/ingest/README.md). Faculty status: `current_docs/Capstone_II_Status_Report_5_Oct_2026.pdf`. QA fix list: `current_docs/database-qa-2026-10-06.md`.
+
+---
+
+## 📋 Project Overview (Capstone I app)
 
 A web-based platform that enables legal scholars to analyze court opinions with AI assistance and human verification. The system implements a three-tier workflow:
 
@@ -63,11 +111,12 @@ A web-based platform that enables legal scholars to analyze court opinions with 
 
 ### Backend
 - **Framework:** FastAPI (Python 3.10+)
-- **Database:** SQLite (development) / PostgreSQL (production)
-- **ORM:** SQLAlchemy
+- **Database (app):** SQLite via SQLAlchemy (Capstone I HITL workflow)
+- **Database (corpus):** Supabase Postgres + pgvector (Capstone II ingest/retrieve)
 - **Authentication:** JWT (python-jose) + bcrypt
-- **Data Processing:** Pandas, PyArrow (Parquet support)
-- **AI Integration:** Groq API (Meta Llama models)
+- **Data Processing:** Pandas, PyArrow (Parquet upload for the app); rule-based Word XML parse for ingest
+- **Embeddings:** local `fastembed` (`BAAI/bge-small-en-v1.5`, 384-d) — not Groq
+- **AI Integration:** Groq API (reserved for System A / System B agent runs)
 
 ### Frontend
 - **Framework:** React 18
@@ -98,8 +147,8 @@ A web-based platform that enables legal scholars to analyze court opinions with 
 
 **1. Clone the repository**
 ```bash
-git clone https://github.com/leanardiles/Court_Opinions_Analyzer.git
-cd Court_Opinions_Analyzer
+git clone https://github.com/leanardiles/us-court-decisions-analyzer.git
+cd us-court-decisions-analyzer
 ```
 
 **2. Backend Setup**
@@ -132,18 +181,18 @@ Create a `.env` file in the `backend/` directory:
 cp .env.example .env
 ```
 
-Then edit `.env` and add your **Groq API key**:
+Then edit `.env`. For the **Capstone I app** you need a Groq key (https://console.groq.com). For **Capstone II ingest/retrieve** you also need the shared Supabase values (password sent privately — do not paste it into Slack or a PDF):
 
-1. Sign up at https://console.groq.com
-2. Create an API key (free tier: 14,400 requests/day)
-3. Add to `.env`:
 ```env
-   GROQ_API_KEY=gsk_your_actual_api_key_here
-   DATABASE_URL=sqlite:///./database.db
-   SECRET_KEY=your-secret-key-here
+GROQ_API_KEY=gsk_your_actual_api_key_here
+DATABASE_URL=sqlite:///./database.db
+SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+SUPABASE_ANON_KEY=your_publishable_key_here
+SUPABASE_DB_PASSWORD='your_database_password'
+SUPABASE_DB_URL=postgresql://postgres.YOUR_PROJECT:URL_ENCODED_PASSWORD@aws-0-us-east-2.pooler.supabase.com:6543/postgres?sslmode=require
 ```
 
-**Important:** Never commit your `.env` file to GitHub! It's already in `.gitignore`.
+See `backend/.env.example`. **Never commit `.env`.** The publishable key cannot read the corpus tables (RLS is on).
 
 **4. Frontend Setup**
 ```bash
@@ -285,36 +334,22 @@ Actionable guidance based on accuracy:
 
 ## 📁 Project Structure
 ```
-Court_Opinions_Analyzer/
+us-court-decisions-analyzer/
 ├── backend/
 │   ├── app/
-│   │   ├── routers/        # API endpoints
+│   │   ├── ingest/         # Capstone II: Word → Supabase + retrieve
+│   │   ├── routers/        # Capstone I API endpoints
 │   │   ├── core/           # Configuration (config.py)
-│   │   ├── database.py     # Database connection
-│   │   ├── models.py       # SQLAlchemy models
-│   │   ├── schemas.py      # Pydantic schemas
+│   │   ├── database.py     # SQLite connection (app only)
+│   │   ├── models.py       # SQLAlchemy models (app only)
 │   │   └── main.py         # FastAPI app
-│   ├── uploads/            # Uploaded Parquet files
-│   ├── venv/               # Virtual environment (not in git)
-│   ├── .env                # Environment variables (not in git)
-│   ├── .env.example        # Template for environment variables
-│   ├── database.db         # SQLite database
-│   ├── init_db.py          # Database setup script
-│   ├── create_test_users.py  # Test user creation
-│   └── requirements.txt    # Python dependencies
-├── frontend/
-│   ├── src/
-│   │   ├── pages/          # React pages
-│   │   ├── components/     # Reusable components
-│   │   ├── api/            # API client
-│   │   ├── App.jsx
-│   │   ├── main.jsx
-│   │   └── index.css
-│   ├── node_modules/       # Node packages (not in git)
-│   ├── package.json
-│   └── vite.config.js
-├── .gitignore
-├── PROJECT_PROGRESS.txt    # Development tracker
+│   ├── data/               # pilot_50_manifest.json (no full opinion dump)
+│   ├── tests/              # ingest QA tests (test_extract_qa.py)
+│   ├── .env.example
+│   └── requirements.txt
+├── frontend/               # Capstone I React UI
+├── supabase/migrations/    # ingest schema + RLS
+├── current_docs/           # status PDFs, QA note (Word dump is gitignored)
 └── README.md
 ```
 
@@ -337,6 +372,10 @@ python create_test_users.py
 # Add new dependency
 pip install package-name
 pip freeze > requirements.txt
+
+# Capstone II retrieve / ingest (does not start the web app)
+./venv/bin/python -m app.ingest.load_supabase --query "..." --k 5
+PYTHONPATH=. ./venv/bin/python -m unittest tests.test_extract_qa -v
 ```
 
 **Frontend:**
@@ -367,8 +406,8 @@ git push
 
 **1. Clone and Install**
 ```bash
-git clone https://github.com/leanardiles/Court_Opinions_Analyzer.git
-cd Court_Opinions_Analyzer
+git clone https://github.com/leanardiles/us-court-decisions-analyzer.git
+cd us-court-decisions-analyzer
 cd backend
 python -m venv venv
 source venv/Scripts/activate  # Windows
@@ -571,9 +610,12 @@ npm run dev
 
 ## 📚 Documentation
 
-- **API Documentation:** http://localhost:8000/docs (auto-generated Swagger UI)
-- **Database Schema:** `backend/docs/DATABASE_SCHEMA.txt`
-- **Development Log:** `PROJECT_PROGRESS.txt`
+- **Capstone II ingest/retrieve:** [`backend/app/ingest/README.md`](backend/app/ingest/README.md)
+- **Faculty status (5 Oct 2026):** `current_docs/Capstone_II_Status_Report_5_Oct_2026.pdf`
+- **Database QA (6 Oct 2026):** `current_docs/database-qa-2026-10-06.md`
+- **Alex handover:** `current_docs/Handover_Enock_to_Alex.pdf`
+- **API Documentation (Capstone I app):** http://localhost:8000/docs
+- **App schema (SQLite):** `backend/docs/DATABASE_SCHEMA.txt`
 - **Groq API Docs:** https://console.groq.com/docs
 
 ---
@@ -642,9 +684,11 @@ python create_test_users.py
 ## 🤝 Contributing
 
 This is a capstone project for academic purposes. For questions or collaboration:
-- **Leandro Ardiles** - [GitHub](https://github.com/leanardiles)
-- **Course:** Capstone I, Katz School
-- **Partner:** Cardozo School of Law
+- **Leandro Ardiles** — repo, Capstone I app, Groq account — [GitHub](https://github.com/leanardiles)
+- **Enock Katenda** — ingest, schema, retrieve
+- **Alex Ji** — System B agents
+- **Tafadzwa Nyemba** — Q1/Q2 ground truth
+- **Course:** COM 6001 Capstone II, Katz School · Partner: Cardozo School of Law
 
 ---
 

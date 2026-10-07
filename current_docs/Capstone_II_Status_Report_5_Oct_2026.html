@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Capstone II Status Report — 5 October 2026</title>
+  <style>
+    @page { size: letter; margin: 0.6in 0.72in 0.55in 0.72in; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #333; font-family: "Inter", "Helvetica Neue", Arial, sans-serif; font-size: 10pt; line-height: 1.38; }
+    h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; color: #003C71; }
+    h1 { font-size: 18.5pt; margin: 0 0 4px 0; line-height: 1.2; }
+    h2 { font-size: 12pt; margin: 10px 0 5px 0; padding-bottom: 3px; border-bottom: 2px solid #0071BC; page-break-after: avoid; }
+    h3 { font-size: 10.5pt; margin: 8px 0 4px 0; color: #0071BC; }
+    p { margin: 0 0 7px 0; }
+    .kicker { color: #FFB81C; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; font-size: 8pt; margin-bottom: 5px; }
+    .banner { background: #003C71; color: #fff; padding: 14px 16px; }
+    .banner h1, .banner p { color: #fff; }
+    .subtitle { font-size: 11pt; margin: 0 0 6px 0; }
+    .meta { font-size: 9pt; color: #d7e6f4; }
+    .goldbar { height: 5px; background: #FFB81C; margin: 0 0 12px 0; }
+    .callout { background: #F5F5F5; border-left: 4px solid #0071BC; padding: 8px 11px; margin: 8px 0 10px 0; }
+    li { margin-bottom: 2px; }
+    table { width: 100%; border-collapse: collapse; margin: 5px 0 8px 0; font-size: 8.9pt; }
+    th { background: #003C71; color: #fff; text-align: left; padding: 4px 6px; }
+    td { padding: 4px 6px; vertical-align: top; border-bottom: 1px solid #E5E5E5; }
+    tr:nth-child(even) td { background: #F5F5F5; }
+    ul, ol { margin: 3px 0 8px 18px; padding: 0; }
+    li { margin-bottom: 3px; }
+    .status { display: inline-block; font-size: 7.6pt; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 1px 6px; border-radius: 9px; }
+    .done { background: #d1fae5; color: #065f46; }
+    .now { background: #fef3c7; color: #92400e; }
+    .next { background: #dbeafe; color: #1e40af; }
+    .later { background: #E5E5E5; color: #444; }
+    .footer-note { font-size: 8pt; color: #666; margin-top: 8px; }
+    .keep { page-break-inside: avoid; }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <div class="kicker">COM 6001 · Capstone in Computer Science II · Faculty status report</div>
+    <h1>Improving Reliability in Legal AI Through Multi-Agent Verification</h1>
+    <p class="subtitle">Court Opinions Analyzer, Phase II — project status as of 5 October 2026</p>
+    <div class="meta">
+      Katz School of Applied Sciences &amp; Cardozo Law School, Yeshiva University<br />
+      Team: Leandro Ardiles, Alex Ji, Enock Katenda, Tafadzwa Nyemba
+    </div>
+  </div>
+  <div class="goldbar"></div>
+
+  <h2>1. Where the project stands</h2>
+  <p>
+    Capstone II tests whether a <strong>multi-agent reading layer</strong> catches incorrect answers on election-law opinions better than a <strong>single model call</strong> plus self-reported confidence — without replacing the human scholar as the final authority.
+  </p>
+  <div class="callout">
+    <strong>This week’s snapshot.</strong> The full LEXIS corpus is now in a shared Postgres database, identified by citation (not file name), grouped into litigation families, and searchable with vector retrieval. The evaluation set is a frozen <strong>50-decision</strong> pilot. We have <strong>not</strong> yet run System A vs System B or written the Q1/Q2 answer key. That is the work of the next several weeks.
+  </div>
+  <p>
+    This updates the 23–24 September plan (then a 20-case Parquet file in the Capstone I app). Filenames such as <em>Craig v. Simon (2)</em> are <strong>other decisions in the same lawsuit</strong> (often district vs. appellate), not duplicates. Identity is the U.S. LEXIS citation. The corpus lives in shared Postgres (Supabase), not Capstone I SQLite. The Capstone I application remains the <strong>System A baseline</strong> (single Groq call, human-in-the-loop). It is not the corpus of record.
+  </p>
+
+  <h2>2. Research question (unchanged)</h2>
+  <p>
+    On the same frozen opinions and the same two questions, does <strong>System B</strong> (two independent readers + an adjudicator that preserves disagreement) outperform <strong>System A</strong> (one Groq call, Capstone I style) — especially on the temporal question Capstone I failed?
+  </p>
+  <table>
+    <thead><tr><th>Question</th><th>Role in the experiment</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Q1 — type of election</strong></td><td>Control. Capstone I was already strong here.</td></tr>
+      <tr><td><strong>Q2 — days between the trial ruling and the election</strong></td><td>Known failure mode (temporal / Purcell-style reasoning).</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Metrics remain accuracy vs. human labels, disagreement among agents, calibration, tokens, latency, and cost. Agents flag; validators and the scholar still decide. We are not building a chatbot for litigants.
+  </p>
+
+  <h2>3. Work completed since the September status report</h2>
+  <table>
+    <thead><tr><th>Workstream</th><th>Status</th><th>What exists now</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Word corpus ingest</td>
+        <td><span class="status done">Complete</span></td>
+        <td>541 LEXIS .docx files parsed with rules (no LLM). 0 parse failures. 540 unique decisions loaded.</td>
+      </tr>
+      <tr>
+        <td>Case identity &amp; families</td>
+        <td><span class="status done">Complete</span></td>
+        <td>Primary key = LEXIS citation (86 files have no U.S. LEXIS line; keyed by source file). 427 litigation families; 383 prior/related links from the LEXIS header.</td>
+      </tr>
+      <tr>
+        <td>Chunking + retrieval</td>
+        <td><span class="status done">Complete</span></td>
+        <td>14,987 chunks with character offsets (0 offset mismatches). Local embeddings; Postgres vector search. Smoke-tested on a Purcell-style query.</td>
+      </tr>
+      <tr>
+        <td>Frozen evaluation set</td>
+        <td><span class="status now">Selected</span></td>
+        <td>50 decisions, mid-length (about 2k–50k characters), at most 3 per family, election-related language. Pending human review of Q1/Q2 fitness.</td>
+      </tr>
+      <tr>
+        <td>System A (Capstone I app)</td>
+        <td><span class="status done">Available</span></td>
+        <td>Existing FastAPI / React HITL analyzer: one Groq call, validator, scholar review. Used as the single-agent baseline, not as the corpus store.</td>
+      </tr>
+      <tr>
+        <td>Q1/Q2 ground truth</td>
+        <td><span class="status next">Not started</span></td>
+        <td>Labels will be keyed by LEXIS citation (or filename if there is no cite). Human-authored.</td>
+      </tr>
+      <tr>
+        <td>System B (multi-agent)</td>
+        <td><span class="status next">Not started</span></td>
+        <td>Two readers + adjudicator on Groq (planned models: GPT-OSS 20B / 120B, Qwen 3.8 27B). Groq budget reserved for this, not for ingest.</td>
+      </tr>
+      <tr>
+        <td>A vs B evaluation run</td>
+        <td><span class="status later">Next</span></td>
+        <td>Cannot start until labels exist and System B can be called on the same 50 decisions.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>4. How the pieces fit</h2>
+  <p>
+    Ingest is rule-based (no LLM). Embeddings are a small local model. Groq is reserved for the experiment. On the 50, a reader can still receive the <strong>full opinion</strong>. Retrieval is for the other ~490 longer opinions and for later evidence checking (an agent cites a character span; we verify it is actually in the opinion).
+  </p>
+
+  <div class="keep">
+    <h2>5. Team roles</h2>
+    <table>
+      <thead><tr><th>Person</th><th>Owns</th><th>This period</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Enock Katenda</td>
+          <td>Ingest, schema, retrieval</td>
+          <td>Corpus and retrieve are in place. Next: share the pipeline in the team repo.</td>
+        </tr>
+        <tr>
+          <td>Alex Ji</td>
+          <td>Models and agents (System B)</td>
+          <td>Next: two readers + adjudicator; log prompts, spans, confidence, cost.</td>
+        </tr>
+        <tr>
+          <td>Leandro Ardiles</td>
+          <td>Capstone I app, GitHub, Groq account</td>
+          <td>System A baseline stays. Next: official Groq access; merge ingest.</td>
+        </tr>
+        <tr>
+          <td>Tafadzwa Nyemba</td>
+          <td>Q1 / Q2 ground truth</td>
+          <td>50-decision list ready. Next: confirm or swap cases; write the answer key.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>6. Next three weeks (planned)</h2>
+  <ol>
+    <li><strong>This week (through 7 Oct, Week 2 checkpoint).</strong> Put ingest/retrieve code on the shared GitHub repository. Invite the team to the shared database. Tafadzwa begins Q1/Q2 labels on the 50. Alex smoke-tests retrieve and drafts the reader/adjudicator interface. Dummy-AI path on System A remains available.</li>
+    <li><strong>8–21 Oct (Weeks 3–4).</strong> Build System B behind the existing analysis call (do not rewrite the frontend first). Run Dummy mode, then Groq. Keep disagreement visible rather than collapsing to one answer.</li>
+    <li><strong>Late October.</strong> Run System A vs System B on the identical 50 decisions and the same two questions. Compare accuracy, disagreement, calibration, tokens, and cost. If retrieval work slips, the 50-case run can still use full opinion text. A temporal-reasoning pass and evidence checker (using stored character offsets) come only after that comparison is in hand.</li>
+  </ol>
+
+  <div class="keep">
+  <h2>7. Risks we are watching</h2>
+  <ul>
+    <li><strong>Labels are the gate.</strong> We cannot score either system until Q1/Q2 ground truth exists for the frozen 50. Poor-fit cases get a new manifest version, not a silent regenerate.</li>
+    <li><strong>Nine of the 50 have no U.S. LEXIS citation</strong> (often state-court exports). Those rows are keyed by source filename.</li>
+    <li><strong>Groq cost.</strong> Ingest did not use Groq; agent runs will. We will log tokens and cost. We are not sending all 540 full opinions through an LLM.</li>
+  </ul>
+  </div>
+
+  <p class="footer-note">
+    Updates the 23–24 September status report and slides. Research question and human-in-the-loop rule are unchanged. COM 6001 · Court Opinions Analyzer.
+  </p>
+</body>
+</html>

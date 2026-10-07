@@ -1,0 +1,227 @@
+{
+  "frozen": true,
+  "count": 20,
+  "note": "Frozen Stage 0 sample for Capstone II Q1/Q2. Do not silently replace these files; extend only with a new manifest version.",
+  "cases": [
+    {
+      "case_name": "Republican Nat'l Comm. v. Wetzel",
+      "source_filename": "Republican Nat_l Comm. v. Wetzel.docx",
+      "court": "United States Court of Appeals for the Fifth Circuit",
+      "case_date": "2024-10-25T00:00:00",
+      "docket_number": "No. 24-60395",
+      "state": "MS",
+      "char_count": 43139,
+      "election_score": 460,
+      "text_sha256": "c26448302803ec94ae5bee75841e2748aed952c03155c06d16f11f0d4ef7814a"
+    },
+    {
+      "case_name": "Bognet v. Boockvar",
+      "source_filename": "Bognet v. Boockvar.docx",
+      "court": "United States District Court for the Western District of Pennsylvania",
+      "case_date": "2020-10-28T00:00:00",
+      "docket_number": "No. 3:20-cv-215",
+      "state": "DE",
+      "char_count": 34056,
+      "election_score": 443,
+      "text_sha256": "7147cf7b11af92e303bfc9e100c31870be85243cad16d3700736435dd2749149"
+    },
+    {
+      "case_name": "Minn. Voters Alliance v. Lake Cnty.",
+      "source_filename": "Minn. Voters Alliance v. Lake Cnty.docx",
+      "court": "Minnesota District Court, County of Lake, Sixth Judicial District",
+      "case_date": "2021-08-03T00:00:00",
+      "docket_number": null,
+      "state": "MN",
+      "char_count": 49136,
+      "election_score": 426,
+      "text_sha256": "c7f7bdc27a1890396241cd721aeb902abe4474c01e17164f092589bcccb7bb98"
+    },
+    {
+      "case_name": "Am. Council of the Blind of Ind. v. Ind. Election Comm'n",
+      "source_filename": "Am. Council of the Blind of Ind. v. Ind. Election Comm_n(2).docx",
+      "court": "United States District Court for the Southern District of Indiana, Indianapolis Division",
+      "case_date": "2022-03-09T00:00:00",
+      "docket_number": "No. 1:20-cv-03118-JMS-MJD",
+      "state": "IN",
+      "char_count": 48449,
+      "election_score": 420,
+      "text_sha256": "56df07a17f15312f5eb8233a575f4f6902dd8edab0b0061e9426829a6dfad863"
+    },
+    {
+      "case_name": "League of Women Voters of S.C. v. Andino",
+      "source_filename": "League of Women Voters of S.C. v. Andino.docx",
+      "court": "United States District Court for the District of South Carolina, Charleston Division",
+      "case_date": "2020-10-27T00:00:00",
+      "docket_number": "No. 2:20-3537-RMG",
+      "state": "NY",
+      "char_count": 49336,
+      "election_score": 410,
+      "text_sha256": "94c7f26aeb7fee3eba9feb090e185669fc9abe7613eeb5f3c9eb0a1365e98fff"
+    },
+    {
+      "case_name": "Shabazz v. N.Y.C. Bd. of Elections",
+      "source_filename": "Shabazz v. N.Y.C. Bd. of Elections.docx",
+      "court": "Supreme Court of New York, New York County",
+      "case_date": "2017-09-01T00:00:00",
+      "docket_number": "No. 157686",
+      "state": "NY",
+      "char_count": 43359,
+      "election_score": 408,
+      "text_sha256": "a65eefe604187cf4f7bc712791487fe84e3d5289cf3d57a7717a75739f005a33"
+    },
+    {
+      "case_name": "Alliance for Retired Ams. v. Sec'y of State",
+      "source_filename": "Alliance for Retired Ams. v. Sec_y of State.docx",
+      "court": "Supreme Judicial Court of Maine",
+      "case_date": "2020-10-14T00:00:00",
+      "docket_number": null,
+      "state": "ME",
+      "char_count": 46573,
+      "election_score": 395,
+      "text_sha256": "ff6bc52addd40f9cb3dc38236673c94bdde43f0d1dcded0e866f9beb5ad258fc"
+    },
+    {
+      "case_name": "Adair County Bd. of Elections v. Arnold",
+      "source_filename": "Adair County Bd. of Elections v. Arnold.docx",
+      "court": "Court of Appeals of Kentucky",
+      "case_date": "2015-09-11T00:00:00",
+      "docket_number": "No. 2015-CA-000661-MR",
+      "state": "KY",
+      "char_count": 48398,
+      "election_score": 383,
+      "text_sha256": "25808346b420fa1d50d4d6d9437415dcc47f67ff2f65fd6119182c5c116735a7"
+    },
+    {
+      "case_name": "State ex rel. Skaggs v. Brunner",
+      "source_filename": "State ex rel. Skaggs v. Brunner.docx",
+      "court": "United States District Court for the Southern District of Ohio, Eastern Division",
+      "case_date": "2008-11-20T00:00:00",
+      "docket_number": "No. 2:08-cv-1077",
+      "state": "OH",
+      "char_count": 38715,
+      "election_score": 375,
+      "text_sha256": "f9abc81ec9b08a177198f761aff5e915833298761385f170f3fdb481096483ab"
+    },
+    {
+      "case_name": "Tex. League of United Latin Am. Citizens v. Hughs",
+      "source_filename": "Tex. League of United Latin Am. Citizens v. Hughs.docx",
+      "court": "United States Court of Appeals for the Fifth Circuit",
+      "case_date": "2020-10-12T00:00:00",
+      "docket_number": "No. 20-50867",
+      "state": "TX",
+      "char_count": 49146,
+      "election_score": 363,
+      "text_sha256": "f56a4138fca33da973b791c1de0a7f803f867975a85e5d9263564934c6c2af67"
+    },
+    {
+      "case_name": "League of Women Voters v. LaRose",
+      "source_filename": "League of Women Voters v. LaRose.docx",
+      "court": "United States District Court for the Southern District of Ohio, Eastern Division",
+      "case_date": "2020-04-03T00:00:00",
+      "docket_number": "No. 2:20-cv-1638",
+      "state": "NY",
+      "char_count": 41227,
+      "election_score": 362,
+      "text_sha256": "09bc6373c68f6d120088ab200dd624858127484438c6ed5879549de2aa614082"
+    },
+    {
+      "case_name": "Republican Nat'l Comm. v. Schmidt",
+      "source_filename": "Republican Nat_l Comm. v. Schmidt.docx",
+      "court": "Supreme Court of Pennsylvania",
+      "case_date": "2024-10-05T00:00:00",
+      "docket_number": "No. 108 MM 2024",
+      "state": "DE",
+      "char_count": 15574,
+      "election_score": 348,
+      "text_sha256": "18fa0ae835a21f616c6db6c0ea149306a2ac6fd743be85e664e7c220d7c13133"
+    },
+    {
+      "case_name": "Carson v. Simon",
+      "source_filename": "Carson v. Simon.docx",
+      "court": "United States Court of Appeals for the Eighth Circuit",
+      "case_date": "2020-10-27T00:00:00",
+      "docket_number": "No. 20-3139",
+      "state": "MN",
+      "char_count": 48580,
+      "election_score": 344,
+      "text_sha256": "eb15f82b7a287e7d3239606f653f30270d66b659dfffec0e2beaaeea4d83c9bd"
+    },
+    {
+      "case_name": "New Ga. Project v. Raffensperger",
+      "source_filename": "New Ga. Project v. Raffensperger.docx",
+      "court": "United States Court of Appeals for the Eleventh Circuit",
+      "case_date": "2020-10-02T00:00:00",
+      "docket_number": "No. 20-13360-D",
+      "state": "GA",
+      "char_count": 47851,
+      "election_score": 317,
+      "text_sha256": "5b75473e5ae4695b293544a7b25527401e671b7aabf457b84f830ab0c45b689f"
+    },
+    {
+      "case_name": "Self Advocacy Sol. N.D. v. Jaeger",
+      "source_filename": "Self Advocacy Sol. N.D. v. Jaeger.docx",
+      "court": "United States District Court for the District of North Dakota, Eastern Division",
+      "case_date": "2020-06-03T00:00:00",
+      "docket_number": "No. 3:20-cv-00071",
+      "state": "ND",
+      "char_count": 46242,
+      "election_score": 316,
+      "text_sha256": "56407403a9d494a9b9df36aa28c2a6b37751812b25e2fcb1cdd5ab5b22a01fc0"
+    },
+    {
+      "case_name": "Moore v. Circosta",
+      "source_filename": "Moore v. Circosta(2).docx",
+      "court": "United States District Court for the Eastern District of North Carolina, Western Division",
+      "case_date": "2020-10-03T00:00:00",
+      "docket_number": "No. 5:20-CV-507-D",
+      "state": "NC",
+      "char_count": 40601,
+      "election_score": 295,
+      "text_sha256": "0762dd072229b3f882afec8baa3362fa98492f3e26f674814b934f26f4f890ba"
+    },
+    {
+      "case_name": "Common Cause/Georgia v. Billups",
+      "source_filename": "Common Cause_Georgia v. Billups.docx",
+      "court": "United States Court of Appeals for the Eleventh Circuit",
+      "case_date": "2009-01-14T00:00:00",
+      "docket_number": "No. 07-14664, No. 08-10432",
+      "state": "GA",
+      "char_count": 48966,
+      "election_score": 273,
+      "text_sha256": "b0d218d04b5daf592da3b6f8731ca4eb7acd446ab56ac07d854d182013797101"
+    },
+    {
+      "case_name": "Paher v. Cegavske",
+      "source_filename": "Paher v. Cegavske(2).docx",
+      "court": "United States District Court for the District of Nevada",
+      "case_date": "2020-04-30T00:00:00",
+      "docket_number": "No. 3:20-cv-00243-MMD-WGC",
+      "state": "NV",
+      "char_count": 47321,
+      "election_score": 261,
+      "text_sha256": "e329488532c73c03a766d9fb03998d1735f4e628f0119376d128021910f9dec4"
+    },
+    {
+      "case_name": "Carey v. Wis. Elections Comm'n",
+      "source_filename": "Carey v. Wis. Elections Comm_n.docx",
+      "court": "United States District Court for the Western District of Wisconsin",
+      "case_date": "2022-08-30T00:00:00",
+      "docket_number": null,
+      "state": "NY",
+      "char_count": 42774,
+      "election_score": 251,
+      "text_sha256": "4c6821731d85a13c3774eeeb207980678b448eb00624b732fbbb9b5bb5a94856"
+    },
+    {
+      "case_name": "Short v. Brown",
+      "source_filename": "Short v. Brown(2).docx",
+      "court": "United States District Court for the Eastern District of California",
+      "case_date": "2018-04-24T00:00:00",
+      "docket_number": "No. 2:18-cv-00421-TLN-KJN",
+      "state": "CA",
+      "char_count": 44921,
+      "election_score": 250,
+      "text_sha256": "5f1fd3547b1701e3f6c3938bee4e6e7b57e2efa4f8d98202a89281812a95ab71"
+    }
+  ]
+}
